@@ -14,11 +14,18 @@ namespace TheAionProject
         // list of all space-time locations
         //
         private List<AtlasLocations> _atlaslocations;
+        private List<GameObject> _gameObjects;
 
         public List<AtlasLocations> AtlasLocationsList
         {
             get { return _atlaslocations; }
             set { _atlaslocations = value; }
+        }
+
+        public List<GameObject> GameObjects
+        {
+            get { return _gameObjects; }
+            set { _gameObjects = value; }
         }
 
         #endregion
@@ -45,7 +52,9 @@ namespace TheAionProject
         /// </summary>
         private void IntializeUniverse()
         {
+
             _atlaslocations = WorldObjects.AtlasLocations as List<AtlasLocations>; //universeObjects as Universe Locations **as List<UniverseLocations>
+            _gameObjects = WorldObjects.gameObjects;
         }
 
         #endregion
@@ -228,10 +237,127 @@ namespace TheAionProject
             return MaxId;
         }
 
+        public bool IsValidGameObjectByLocationId(int gameObjectId, int currentAtlasLocation)
+        {
+            List<int> gameObjectIds = new List<int>();
 
+            //
+            // create a list of game object ids in current space-time location
+            //
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject.AtlasLocationId == currentAtlasLocation)
+                {
+                    gameObjectIds.Add(gameObject.Id);
+                }
 
+            }
 
+            //
+            // determine if the game object id is a valid id and return the result
+            //
+            if (gameObjectIds.Contains(gameObjectId))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
+        public GameObject GetGameObjectById(int Id)
+        {
+            GameObject gameObjectToReturn = null;
+
+            //
+            // run through the game object list and grab the correct one
+            //
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject.Id == Id)
+                {
+                    gameObjectToReturn = gameObject;
+                }
+            }
+
+            //
+            // the specified ID was not found in the universe
+            // throw and exception
+            //
+            if (gameObjectToReturn == null)
+            {
+                string feedbackMessage = $"The Game Object ID {Id} does not exist in the current World.";
+                throw new ArgumentException(Id.ToString(), feedbackMessage);
+            }
+
+            return gameObjectToReturn;
+        }
+
+        public List<GameObject> GetGameObjectsBySpaceTimeLocationId(int atlasLocationId)
+        {
+            List<GameObject> gameObjects = new List<GameObject>();
+
+            //
+            // run through the game object list and grab all that are in the current space-time location
+            //
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject.AtlasLocationId == atlasLocationId)
+                {
+                    gameObjects.Add(gameObject);
+                }
+            }
+
+            return gameObjects;
+        }
+
+        public bool IsValidTravelerObjectByLocationId(int travelerObjectId, int currentSpaceTimeLocation)
+        {
+            List<int> travelerObjectIds = new List<int>();
+
+            //
+            // create a list of traveler object ids in current space-time location
+            //
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject.AtlasLocationId == currentSpaceTimeLocation && gameObject is TravelerObject)
+                {
+                    travelerObjectIds.Add(gameObject.Id);
+                }
+
+            }
+
+            //
+            // determine if the game object id is a valid id and return the result
+            //
+            if (travelerObjectIds.Contains(travelerObjectId))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public List<TravelerObject> GetTravelerObjectsBySpaceTimeLocationId(int spaceTimeLocationId)
+        {
+            List<TravelerObject> travelerObjects = new List<TravelerObject>();
+
+            //
+            // run through the game object list and grab all that are in the current space-time location
+            //
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject.AtlasLocationId == spaceTimeLocationId && gameObject is TravelerObject)
+                {
+                    travelerObjects.Add(gameObject as TravelerObject);
+                }
+            }
+
+            return travelerObjects;
+        }
 
 
         #endregion

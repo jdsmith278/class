@@ -135,7 +135,7 @@ namespace TheAionProject
               /* "Press any key to begin."*/;
 
             return messageBoxText;
-           
+
         }
 
         #endregion
@@ -279,6 +279,145 @@ namespace TheAionProject
             statusBoxText.Add($"Lives: {exile.Lives}\n");
 
             return statusBoxText;
+        }
+
+        public static string ListAllGameObjects(IEnumerable<GameObject> gameObjects)
+        {
+            //
+            // display table name and column headers
+            //
+            string messageBoxText =
+                "Game Objects\n" +
+                " \n" +
+
+                //
+                // display table header
+                //
+                "ID".PadRight(10) +
+                "Name".PadRight(30) +
+                "Space-Time Location Id".PadRight(10) + "\n" +
+                "---".PadRight(10) +
+                "----------------------".PadRight(30) +
+                "----------------------".PadRight(10) + "\n";
+
+            //
+            // display all traveler objects in rows
+            //
+            string gameObjectRows = null;
+            foreach (GameObject gameObject in gameObjects)
+            {
+                gameObjectRows +=
+                    $"{gameObject.Id}".PadRight(10) +
+                    $"{gameObject.Name}".PadRight(30) +
+                    $"{gameObject.AtlasLocationId}".PadRight(10) +
+                    Environment.NewLine;
+            }
+
+            messageBoxText += gameObjectRows;
+
+            return messageBoxText;
+        }
+
+        public static string LookAt(GameObject gameObject)
+        {
+            string messageBoxText = "";
+
+            messageBoxText =
+                $"{gameObject.Name}\n" +
+                " \n" +
+                gameObject.Description + " \n" +
+                " \n";
+
+            if (gameObject is TravelerObject)
+            {
+                TravelerObject travelerObject = gameObject as TravelerObject;
+
+                messageBoxText += $"The {travelerObject.Name} has a value of {travelerObject.Value} and ";
+
+                if (travelerObject.CanInventory)
+                {
+                    messageBoxText += "may be added to your inventory.";
+                }
+                else
+                {
+                    messageBoxText += "may not be added to your inventory.";
+                }
+            }
+            else
+            {
+                messageBoxText += $"The {gameObject.Name} may not be added to your inventory.";
+            }
+
+            return messageBoxText;
+        }
+
+        public static string CurrentInventory(IEnumerable<TravelerObject> inventory)
+        {
+            string messageBoxText = "";
+
+            //
+            // display table header
+            //
+            messageBoxText =
+            "ID".PadRight(10) +
+            "Name".PadRight(30) +
+            "Type".PadRight(10) +
+            "\n" +
+            "---".PadRight(10) +
+            "----------------------------".PadRight(30) +
+            "----------------------".PadRight(10) +
+            "\n";
+
+            //
+            // display all traveler objects in rows
+            //
+            string inventoryObjectRows = null;
+            foreach (TravelerObject inventoryObject in inventory)
+            {
+                inventoryObjectRows +=
+                    $"{inventoryObject.Id}".PadRight(10) +
+                    $"{inventoryObject.Name}".PadRight(30) +
+                    $"{inventoryObject.Type}".PadRight(10) +
+                    Environment.NewLine;
+            }
+
+            messageBoxText += inventoryObjectRows;
+
+            return messageBoxText;
+        }
+
+        public static string GameObjectsChooseList(IEnumerable<GameObject> gameObjects)
+        {
+            //
+            // display table name and column headers
+            //
+            string messageBoxText =
+                "Game Objects\n" +
+                " \n" +
+
+                //
+                // display table header
+                //
+                "ID".PadRight(10) +
+                "Name".PadRight(30) + "\n" +
+                "---".PadRight(10) +
+                "----------------------".PadRight(30) + "\n";
+
+            //
+            // display all traveler objects in rows
+            //
+            string gameObjectRows = null;
+            foreach (GameObject gameObject in gameObjects)
+            {
+                gameObjectRows +=
+                    $"{gameObject.Id}".PadRight(10) +
+                    $"{gameObject.Name}".PadRight(30) +
+                    Environment.NewLine;
+            }
+
+            messageBoxText += gameObjectRows;
+
+            return messageBoxText;
         }
 
         #endregion

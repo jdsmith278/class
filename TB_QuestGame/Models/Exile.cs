@@ -28,6 +28,7 @@ namespace TheAionProject
         private int _lives;
         public Weapon _weapons;
         private List<int> _atlasLocationsVisited;
+        private List<TravelerObject> _inventory;
 
         #endregion
 
@@ -51,7 +52,7 @@ namespace TheAionProject
             set { _lives = value; }
         }
 
-        public Weapon WeaponType     
+        public Weapon WeaponType
         {
             get { return _weapons; }
             set { _weapons = value; }
@@ -63,22 +64,16 @@ namespace TheAionProject
             set { _atlasLocationsVisited = value; }
         }
 
+        public List<TravelerObject> Inventory
+        {
+            get { return _inventory; }
+            set { _inventory = value; }
+        }
+
         #endregion
 
         #region CONSTRUCTORS
-
-        public Exile()
-        {
-            _atlasLocationsVisited = new List<int>();
-        }
-
-        public Exile(int name, FactionType race, int atlasLocationID) : base(name, race, atlasLocationID) // should fix if improper page 12 referance guide sprint 2 did not contain 3 arguments
-        {
-            _atlasLocationsVisited = new List<int>();
-        }
-
-
-
+                
         #endregion
 
         #region METHODS
@@ -93,6 +88,29 @@ namespace TheAionProject
                 return false;
             }
         }
+
+        public Exile()
+        {
+            _atlasLocationsVisited = new List<int>();
+            _inventory = new List<TravelerObject>();
+        }
+
+        public Exile(int name, FactionType race, int atlasLocationID) : base(name, race, atlasLocationID)
+        {
+            _atlasLocationsVisited = new List<int>();
+            _inventory = new List<TravelerObject>();
+        }
+
+
+        //public Exile()
+        //{
+        //    _atlasLocationsVisited = new List<int>();
+        //}
+
+        //public Exile(int name, FactionType race, int atlasLocationID) : base(name, race, atlasLocationID) // should fix if improper page 12 referance guide sprint 2 did not contain 3 arguments
+        //{
+        //    _atlasLocationsVisited = new List<int>();
+        //}
 
 
         #endregion

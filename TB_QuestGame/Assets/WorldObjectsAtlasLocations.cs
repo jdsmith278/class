@@ -9,7 +9,7 @@ namespace TheAionProject
     /// <summary>
     /// static class to hold all objects in the game universe; locations, game objects, npc's
     /// </summary>
-    public static class WorldObjects
+    public static partial class WorldObjects
     {
         public static List<AtlasLocations> AtlasLocations = new List<AtlasLocations>()
         {

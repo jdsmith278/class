@@ -26,7 +26,7 @@ namespace TheAionProject
         Atlas _gameWorld; // game universe
 
         ViewStatus _viewStatus;
-        
+
         #endregion
 
         #region PROPERTIES
@@ -43,20 +43,20 @@ namespace TheAionProject
             _gameTraveler = gameTraveler;
             _gameWorld = gameWorld; // game universe
 
-            
+
             _viewStatus = ViewStatus.PlayingGame; // CHANGED FROM ExileInitialization to get Stats to show up!
-            
-            
+
+
 
             InitializeDisplay();
-           
+
 
         }
 
         public void DisplayListOfAtlasLocations()
         {
             DisplayGamePlayScreen("List: Atlas Locations", Text.ListAllAtlasLocations
-                (_gameWorld.AtlasLocationsList), ActionMenu.MainMenu, "");
+                (_gameWorld.AtlasLocationsList), ActionMenu.AdminMenu, "");  /// HAD MAIN MENU BEFORE //todo
         }
 
         #endregion
@@ -138,34 +138,48 @@ namespace TheAionProject
         /// get an integer value from the user
         /// </summary>
         /// <returns>integer value</returns>
-        public bool GetInteger(string prompt, int minimumValue, int maximumValue, out int integerChoice)
+        private bool GetInteger(string prompt, int minimumValue, int maximumValue, out int integerChoice)
         {
             bool validResponse = false;
             integerChoice = 0;
+
+            //
+            // validate on range if either minimumValue and maximumValue are not 0
+            //
+            bool validateRange = (minimumValue != 0 || maximumValue != 0);
 
             DisplayInputBoxPrompt(prompt);
             while (!validResponse)
             {
                 if (int.TryParse(Console.ReadLine(), out integerChoice))
                 {
-                    if (integerChoice >= minimumValue && integerChoice <= maximumValue)
+                    if (validateRange)
                     {
-                        validResponse = true;
+                        if (integerChoice >= minimumValue && integerChoice <= maximumValue)
+                        {
+                            validResponse = true;
+                        }
+                        else
+                        {
+                            ClearInputBox();
+                            DisplayInputErrorMessage($"You must enter an integer value between {minimumValue} and {maximumValue}. Please try again.");
+                            DisplayInputBoxPrompt(prompt);
+                        }
                     }
                     else
                     {
-                        ClearInputBox();
-                        DisplayInputErrorMessage($"You must enter an integer value between {minimumValue} and {maximumValue}. Please try again.");
-                        DisplayInputBoxPrompt(prompt);
+                        validResponse = true;
                     }
                 }
                 else
                 {
                     ClearInputBox();
-                    DisplayInputErrorMessage($"You must enter an integer value between {minimumValue} and {maximumValue}. Please try again.");
+                    DisplayInputErrorMessage($"You must enter an integer value. Please try again.");
                     DisplayInputBoxPrompt(prompt);
                 }
             }
+
+            Console.CursorVisible = false;
 
             return true;
         }
@@ -536,7 +550,7 @@ namespace TheAionProject
             }
             else
             {
-                
+
             }
 
             return traveler;
@@ -585,26 +599,201 @@ namespace TheAionProject
 
         public void DisplayTravelerInfo()
         {
-            
+
             AtlasLocations currentAtlasLocation = _gameWorld.getAtlasLocationById(_gameTraveler.AtlasLocationsID);
             DisplayGamePlayScreen($"{ _gameTraveler.Name} Information", Text.TravelerInfo(_gameTraveler, currentAtlasLocation), ActionMenu.MainMenu, "");
         }
 
         public void DisplayLookAround()
         {
-            AtlasLocations currentSpaceTimeLocation = _gameWorld.GetSpaceTimeLocationByID(_gameTraveler.AtlasLocationsID);
-            DisplayGamePlayScreen("Current Location", Text.LookAround(currentSpaceTimeLocation), ActionMenu.MainMenu, "");
-        }
-       ///public void DisplayLookAround()
-       // {
-       //     int atlasLocationID = _gameTraveler.AtlasLocationsID;
-       //     AtlasLocations currentAtlasLocation = _gameWorld.GetSpaceTimeLocationByID(atlasLocationID);
+            //
+            // get current space-time location
+            //
+            AtlasLocations currentAtlasLocation = _gameWorld.getAtlasLocationById(_gameTraveler.AtlasLocationsID);
 
-       //     DisplayGamePlayScreen("Current Location", Text.LookAround(currentAtlasLocation, ActionMenu.MainMenu, "")); // bugged
-       // }
+            //
+            // get list of game objects in current space-time location
+            //
+            List<GameObject> gameObjectsInCurrentSpaceTimeLocation = _gameWorld.GetGameObjectsBySpaceTimeLocationId(_gameTraveler.AtlasLocationsID);
+
+            string messageBoxText = Text.LookAround(currentAtlasLocation) + Environment.NewLine + Environment.NewLine;
+            messageBoxText += Text.GameObjectsChooseList(gameObjectsInCurrentSpaceTimeLocation);
+
+            DisplayGamePlayScreen("Current Location", messageBoxText, ActionMenu.MainMenu, "");
+        }
+        ///public void DisplayLookAround()
+        // {
+        //     int atlasLocationID = _gameTraveler.AtlasLocationsID;
+        //     AtlasLocations currentAtlasLocation = _gameWorld.GetSpaceTimeLocationByID(atlasLocationID);
+
+        //     DisplayGamePlayScreen("Current Location", Text.LookAround(currentAtlasLocation, ActionMenu.MainMenu, "")); // bugged
+        // }
 
         #endregion
 
+        public void DisplayListOfAllGameObjects()
+        {
+            DisplayGamePlayScreen("List: Game Objects", Text.ListAllGameObjects(_gameWorld.GameObjects), ActionMenu.AdminMenu, "");
+        }
+
+        public int DisplayGetGameObjectToLookAt()
+        {
+            int gameObjectId = 0;
+            bool validGamerObjectId = false;
+
+            //
+            // get a list of game objects in the current space-time location
+            //
+            List<GameObject> gameObjectsInSpaceTimeLocation = _gameWorld.GetGameObjectsBySpaceTimeLocationId(_gameTraveler.AtlasLocationsID);
+
+            if (gameObjectsInSpaceTimeLocation.Count > 0)
+            {
+                DisplayGamePlayScreen("Look at a Object", Text.GameObjectsChooseList(gameObjectsInSpaceTimeLocation), ActionMenu.MainMenu, "");
+
+                while (!validGamerObjectId)
+                {
+                    //
+                    // get an integer from the player
+                    //
+                    GetInteger($"Enter the Id number of the object you wish to look at: ", 0, 0, out gameObjectId);
+
+                    //
+                    // validate integer as a valid game object id and in current location
+                    //
+                    if (_gameWorld.IsValidGameObjectByLocationId(gameObjectId, _gameTraveler.AtlasLocationsID))
+                    {
+                        validGamerObjectId = true;
+                    }
+                    else
+                    {
+                        ClearInputBox();
+                        DisplayInputErrorMessage("It appears you entered an invalid game object id. Please try again.");
+                    }
+                }
+            }
+            else
+            {
+                DisplayGamePlayScreen("Look at a Object", "It appears there are no game objects here.", ActionMenu.MainMenu, "");
+            }
+
+            return gameObjectId;
+        }
+
+        public void DisplayInventory()
+        {
+            DisplayGamePlayScreen("Current Inventory", Text.CurrentInventory(_gameTraveler.Inventory), ActionMenu.MainMenu, "");
+        }
+
+        public int DisplayGetTravelerObjectToPickUp()
+        {
+            int gameObjectId = 0;
+            bool validGameObjectId = false;
+
+            //
+            // get a list of traveler objects in the current space-time location
+            //
+            List<TravelerObject> travelerObjectsInSpaceTimeLocation = _gameWorld.GetTravelerObjectsBySpaceTimeLocationId(_gameTraveler.AtlasLocationsID);
+
+            if (travelerObjectsInSpaceTimeLocation.Count > 0)
+            {
+                DisplayGamePlayScreen("Pick Up Game Object", Text.GameObjectsChooseList(travelerObjectsInSpaceTimeLocation), ActionMenu.MainMenu, "");
+
+                while (!validGameObjectId)
+                {
+                    //
+                    // get an integer from the player
+                    //
+                    GetInteger($"Enter the Id number of the object you wish to add to your inventory: ", 0, 0, out gameObjectId);
+
+                    //
+                    // validate integer as a valid game object id and in current location
+                    //
+                    if (_gameWorld.IsValidTravelerObjectByLocationId(gameObjectId, _gameTraveler.AtlasLocationsID))
+                    {
+                        TravelerObject travelerObject = _gameWorld.GetGameObjectById(gameObjectId) as TravelerObject;
+                        if (travelerObject.CanInventory)
+                        {
+                            validGameObjectId = true;
+                        }
+                        else
+                        {
+                            ClearInputBox();
+                            DisplayInputErrorMessage("It appears you may not inventory that object. Please try again.");
+                        }
+                    }
+                    else
+                    {
+                        ClearInputBox();
+                        DisplayInputErrorMessage("It appears you entered an invalid game object id. Please try again.");
+                    }
+                }
+            }
+            else
+            {
+                DisplayGamePlayScreen("Pick Up Game Object", "It appears there are no game objects here.", ActionMenu.MainMenu, "");
+            }
+
+            return gameObjectId;
+        }
+
+        public void DisplayConfirmTravelerObjectAddedToInventory(TravelerObject objectAddedToInventory)
+        {
+            DisplayGamePlayScreen("Pick Up Game Object", $"The {objectAddedToInventory.Name} has been added to your inventory.", ActionMenu.MainMenu, "");
+        }
+
+        public void DisplayConfirmTravelerObjectRemovedFromInventory(TravelerObject objectRemovedFromInventory)
+        {
+            DisplayGamePlayScreen("Put Down Game Object", $"The {objectRemovedFromInventory.Name} has been removed from your inventory.", ActionMenu.MainMenu, "");
+        }
+
+        public int DisplayGetInventoryObjectToPutDown()
+        {
+            int travelerObjectId = 0;
+            bool validInventoryObjectId = false;
+
+            if (_gameTraveler.Inventory.Count > 0)
+            {
+                DisplayGamePlayScreen("Put Down Game Object", Text.GameObjectsChooseList(_gameTraveler.Inventory), ActionMenu.MainMenu, "");
+
+                while (!validInventoryObjectId)
+                {
+                    //
+                    // get an integer from the player
+                    //
+                    GetInteger($"Enter the Id number of the object you wish to remove from your inventory: ", 0, 0, out travelerObjectId);
+
+                    //
+                    // find object in inventory
+                    // note: LINQ used, but a foreach loop may also be used 
+                    //
+                    TravelerObject objectToPutDown = _gameTraveler.Inventory.FirstOrDefault(o => o.Id == travelerObjectId);
+
+                    //
+                    // validate object in inventory
+                    //
+                    if (objectToPutDown != null)
+                    {
+                        validInventoryObjectId = true;
+                    }
+                    else
+                    {
+                        ClearInputBox();
+                        DisplayInputErrorMessage("It appears you entered the Id of an object not in the inventory. Please try again.");
+                    }
+                }
+            }
+            else
+            {
+                DisplayGamePlayScreen("Pick Up Game Object", "It appears there are no objects currently in inventory.", ActionMenu.MainMenu, "");
+            }
+
+            return travelerObjectId;
+        }
+
+        public void DisplayGameObjectInfo(GameObject gameObject)
+        {
+            DisplayGamePlayScreen("Current Location", Text.LookAt(gameObject), ActionMenu.MainMenu, "");
+        }
         #endregion
     }
 }

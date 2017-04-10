@@ -12,6 +12,12 @@ namespace TheAionProject
     public enum ExileAction
     {
         None,
+        ListGameObjects,  //
+        AdminMenu,        //
+        ReturnToMainMenu, //
+        PickUp,           //
+        PutDown,          //
+        Inventory,        //
         MissionSetup,
         LookAround,
         LookAt,

@@ -52,6 +52,12 @@ namespace TheAionProject
             _gameConsoleView = new ConsoleView(_gameTraveler, _gameWorld); // ADDED game universe
             _playingGame = true;
 
+            //
+            // add initial items to the traveler's inventory
+            //
+            _gameTraveler.Inventory.Add(_gameWorld.GetGameObjectById(8) as TravelerObject);
+            _gameTraveler.Inventory.Add(_gameWorld.GetGameObjectById(9) as TravelerObject);
+
             Console.CursorVisible = false;
         }
 
@@ -105,6 +111,18 @@ namespace TheAionProject
                 //
                 UpdateGameStatus();
 
+                //
+                // get next game action from player
+                //
+                if (ActionMenu.currentMenu == ActionMenu.CurrentMenu.MainMenu)
+                {
+                    travelerActionChoice = _gameConsoleView.GetActionMenuChoice(ActionMenu.MainMenu);
+                }
+                else if (ActionMenu.currentMenu == ActionMenu.CurrentMenu.AdminMenu)
+                {
+                    travelerActionChoice = _gameConsoleView.GetActionMenuChoice(ActionMenu.AdminMenu);
+                }
+
 
                 travelerActionChoice = _gameConsoleView.GetActionMenuChoice(ActionMenu.MainMenu);
 
@@ -128,8 +146,38 @@ namespace TheAionProject
                         _gameConsoleView.DisplayLocationsVistied();
                         break;
 
+                    case ExileAction.LookAt:
+                        LookAtAction();
+                        break;
+
+                    case ExileAction.PickUp:
+                        PickUpAction();
+                        break;
+
+                    case ExileAction.PutDown:
+                        PutDownAction();
+                        break;
+                        
+                    case ExileAction.ListGameObjects:
+                        _gameConsoleView.DisplayListOfAllGameObjects();
+                        break;
+
                     case ExileAction.Exit:
                         _playingGame = false;
+                        break;
+
+                    case ExileAction.AdminMenu:
+                        ActionMenu.currentMenu = ActionMenu.CurrentMenu.AdminMenu;
+                        _gameConsoleView.DisplayGamePlayScreen("Admin Menu", "Select an operation from the menu.", ActionMenu.AdminMenu, "");
+                        break;
+
+                    case ExileAction.ReturnToMainMenu:
+                        ActionMenu.currentMenu = ActionMenu.CurrentMenu.MainMenu;
+                        _gameConsoleView.DisplayGamePlayScreen("Current Location", Text.CurrentLocationInfo(_currentLocation), ActionMenu.MainMenu, "");
+                        break;
+
+                    case ExileAction.Inventory:
+                        _gameConsoleView.DisplayInventory();
                         break;
 
                     default:
@@ -177,7 +225,7 @@ namespace TheAionProject
             _gameTraveler.WeaponType = traveler.WeaponType;
             _gameTraveler.AtlasLocationsID = 1;
 
-            _gameTraveler.ExperiencePoints = -1000; 
+            _gameTraveler.ExperiencePoints = -1000;
             _gameTraveler.Health = 50;
             _gameTraveler.Lives = 1;
         }
@@ -197,6 +245,85 @@ namespace TheAionProject
 
                 _gameTraveler.ExperiencePoints += _currentLocation.ExperiencePoints;
             }
+        }
+
+        private void LookAtAction()
+        {
+            //
+            // display a list of game objects in space-time location and get a player choice
+            //
+            int gameObjectToLookAtId = _gameConsoleView.DisplayGetGameObjectToLookAt();
+
+            //
+            // display game object info
+            //
+            if (gameObjectToLookAtId != 0)
+            {
+                //
+                // get the game object from the universe
+                //
+                GameObject gameObject = _gameWorld.GetGameObjectById(gameObjectToLookAtId);
+
+                //
+                // display information for the object chosen
+                //
+                _gameConsoleView.DisplayGameObjectInfo(gameObject);
+            }
+        }
+
+        private void PickUpAction()
+        {
+            //
+            // display a list of traveler objects in space-time location and get a player choice
+            //
+            int travelerObjectToPickUpId = _gameConsoleView.DisplayGetTravelerObjectToPickUp();
+
+            //
+            // add the traveler object to traveler's inventory
+            //
+            if (travelerObjectToPickUpId != 0)
+            {
+                //
+                // get the game object from the universe
+                //
+                TravelerObject travelerObject = _gameWorld.GetGameObjectById(travelerObjectToPickUpId) as TravelerObject;
+
+                //
+                // note: traveler object is added to list and the space-time location is set to 0
+                //
+                _gameTraveler.Inventory.Add(travelerObject);
+                travelerObject.AtlasLocationId = 0;
+
+                //
+                // display confirmation message
+                //
+                _gameConsoleView.DisplayConfirmTravelerObjectAddedToInventory(travelerObject);
+            }
+        }
+
+        private void PutDownAction()
+        {
+            //
+            // display a list of traveler objects in inventory and get a player choice
+            //
+            int inventoryObjectToPutDownId = _gameConsoleView.DisplayGetInventoryObjectToPutDown();
+
+            //
+            // get the game object from the universe
+            //
+            TravelerObject travelerObject = _gameWorld.GetGameObjectById(inventoryObjectToPutDownId) as TravelerObject;
+
+            //
+            // remove the object from inventory and set the space-time location to the current value
+            //
+            _gameTraveler.Inventory.Remove(travelerObject);
+            travelerObject.AtlasLocationId = _gameTraveler.AtlasLocationsID;
+
+            //
+            // display confirmation message
+            //
+            _gameConsoleView.DisplayConfirmTravelerObjectRemovedFromInventory(travelerObject);
+
         }
 
         #endregion
